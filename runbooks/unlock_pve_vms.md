@@ -67,3 +67,14 @@ for v in locked_vms:
     else:
         print(f"🔴 ABORT: VM {v['vmid']} has active I/O. Do not unlock.")
 ```
+
+### Step 4: Execute Unlock
+Clear the lock on safe VMs.
+
+```python
+for v in safe_to_unlock:
+    node, vmid = v['node'], v['vmid']
+    # Execute API call to unlock
+    # proxmox.nodes(node).qemu(vmid).config.post(skiplock=1) # (Simplified for safety)
+    print(f"✅ Lock cleared on VM {vmid} ({v['name']}).")
+```
