@@ -1,0 +1,36 @@
+---
+title: "SRE Playbooks – Proxmox"
+subtitle: "Operational runbooks and incident post-mortems for the Proxmox infrastructure"
+date: today
+---
+
+## Overview
+
+This site contains the SRE runbooks and incident review documentation for managing
+our Proxmox Virtual Environment (PVE) infrastructure.
+
+## Structure
+
+- **Runbooks** — Step-by-step operational procedures (e.g., unlocking VMs)
+- **Incident Reviews** — Post-mortems and explanations tied to specific runbooks
+
+## How to Use
+
+Navigate using the sidebar. Each runbook is self-contained and includes:
+
+1. Prerequisites
+2. Step-by-step instructions
+3. Rollback / recovery steps
+4. Related incidents
+
+## Runbooks
+
+| Runbook | Description |
+|---|---|
+| [Unlock PVE VMs](docs/runbook-explanation/unlock_pve_vms.qmd) | How to unlock stuck or locked VMs in Proxmox |
+
+## Incident Reviews
+
+| Review | Description |
+|---|---|
+| [VM Locked After Backup Failure](docs/incident-reviews/unlock_pve_vms.qmd) | Post-mortem log for `locked: backup` incidents |
