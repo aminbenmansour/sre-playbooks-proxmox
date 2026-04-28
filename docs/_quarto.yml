@@ -1,0 +1,29 @@
+project:
+  type: book  # or 'website' if you prefer
+
+book:
+  title: "SRE Playbooks – Proxmox"
+  author: "Amine GmbH"
+  date: today
+  # if project.type = 'website' value set to 'navbar' or 'sidebar'
+  # if project.type = 'book' value set to 'chapters'
+  chapters:
+    - index.qmd
+    - part: "Runbook Explanations"
+      chapters:
+        - docs/runbook-explanation/unlock_pve_vms.qmd
+    - part: "Incident Reviews"
+      chapters:
+        - docs/incident-reviews/unlock_pve_vms.qmd
+
+format:
+  html:
+    theme: cosmo       # or darkly, flatly, etc.
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-copy: true
+    code-tools: true
+
+execute:
+  freeze: auto         # cache outputs to avoid re-running on every render

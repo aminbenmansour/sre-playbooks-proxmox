@@ -1,0 +1,64 @@
+---
+title: "Incident Review: VM Locked After Backup Failure"
+subtitle: "Post-mortem log for `locked: backup` incidents on Proxmox"
+author: "SRE Infrastructure Team"
+date: today
+format:
+  html:
+    toc: true
+    theme: cosmo
+---
+
+## Purpose
+This document tracks real incidents where VMs were left in a `locked: backup` state after a failed PBS backup. Each entry links back to the [runbook explanation](/docs/runbook-explanation/unlock_pve_vms.qmd) and the [remediation runbook](/runbooks/compute/unlock_pve_vms.md).
+
+---
+
+## Incident Log
+### INC-001 — 2025-03-14
+
+| Field | Detail |
+|---|---|
+| **VM ID** | 112 |
+| **Node** | pve-node-02 |
+| **Lock detected** | `locked: backup` |
+| **Root cause** | PBS network timeout during incremental backup at 02:17 UTC |
+| **Impact** | VM online but unmigrateable for ~40 min |
+| **Resolved by** | Manual lock clear via runbook after confirming no active vzdump task |
+| **Resolution time** | 40 minutes |
+| **Runbook followed** | Yes — `unlock_pve_vms.md` |
+| **Safety check passed** | Yes — no active `vzdump` task found |
+
+**Timeline:**
+
+- `02:17` — PBS reports connection lost mid-backup
+- `02:19` — Alert triggered: VM 112 migration fails on pve-node-02
+- `02:31` — On-call SRE identifies `lock: backup` in VM config
+- `02:45` — Runbook executed, safety check passed, lock cleared
+- `02:57` — VM successfully migrated, incident closed
+
+**Notes:**
+> Backup network path between PBS and pve-node-02 flapped due to a switch
+> port reset. No data corruption observed. Dirty bitmap was invalidated and
+> next backup ran as a full backup automatically.
+
+---
+
+<!-- Copy the block above for each new incident -->
+
+## Recurring Patterns
+- Most incidents occur during the **02:00–04:00 UTC** backup window
+- `pve-node-02` has had the most occurrences — network path investigation pending
+- All incidents resolved without VM downtime
+
+## Preventive Measures Tracked
+| Measure | Status |
+|---|---|
+| Increase PBS backup timeout threshold | ✅ Done — set to 3600s |
+| Add lock-detection alert in monitoring | 🔄 In progress |
+| Redundant network path for PBS traffic | ❌ Pending |
+
+## References
+- [Runbook Explanation — Understanding the Lock](../runbook-explanation/unlock_pve_vms.qmd)
+- [Remediation Runbook — unlock_pve_vms.md](/runbooks/compute/unlock_pve_vms.md)
+- [Proxmox Backup Locking Docs](https://pve.proxmox.com/wiki/Backup_and_Restore)
