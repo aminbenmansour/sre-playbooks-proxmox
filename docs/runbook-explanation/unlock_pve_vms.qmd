@@ -1,0 +1,52 @@
+```yaml
+---
+title: "Proxmox Knowledge Base: Understanding & Fixing `locked: backup`"
+author: "SRE Infrastructure Team"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+---
+```
+## Incident Overview 
+
+When a Proxmox Backup Server (PBS) backup is interrupted (usually via network timeout), the Proxmox hypervisor may fail to drop the `backup` lock on the VM configuration file (`/etc/pve/qemu-server/<vmid>.conf`). 
+
+The VM will remain running, but SREs cannot migrate, resize, or reboot the VM until the lock is cleared. That behavior protects against the corruption of the QEMU dirty-bitmap tracking used for incremental backups.
+
+## The Architecture of a Lock
+When `vzdump` runs, it manipulates the QEMU process to track "dirty" blocks.
+
+```{mermaid}
+sequenceDiagram
+    participant PBS as Proxmox Backup Server
+    participant PVE as PVE Node
+    participant QEMU as VM Process
+
+    PBS->>PVE: Request Backup (API)
+    PVE->>PVE: Write `lock: backup` to config
+    PVE->>QEMU: Initiate Snapshot / Dirty Bitmap
+    QEMU-->>PVE: Stream data
+    PVE-->>PBS: Send Chunks
+    Note over PBS,PVE: If network drops here, lock remains!
+```
+
+## Remediation Protocol
+Do **not** use the GUI to blindly unlock the VM. Follow the [Jupyter Runbook for VM Unlocking](/runbooks/compute/unlock_pve_vms.md).
+
+## Under the Hood: The Safety Guardrail
+Our `lib/pve_safety.py` library queries the `/api2/json/nodes/{node}/tasks` endpoint. If any task matches `type: vzdump` and the `vmid`, we block the unlock command to prevent corrupting the `QCOW2/RBD` image.
+
+```python
+#| eval: false
+# Core safety logic abstraction
+tasks = proxmox.nodes(node).tasks.get()
+for task in tasks:
+    if task['status'] == 'running' and task['type'] == 'vzdump':
+        raise Exception("Unsafe to unlock!")
+```
