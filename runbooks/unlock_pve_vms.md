@@ -34,3 +34,17 @@ proxmox = ProxmoxAPI(
 print(f"✅ Authenticated to {PVE_HOST}")
 ```
 
+### Step 2: Identify Locked VMs
+Query the cluster for any VMs currently reporting a lock.
+
+```python
+locked_vms = []
+for node in proxmox.nodes.get():
+    for vm in proxmox.nodes(node['node']).qemu.get():
+        if vm.get('lock') == 'backup':
+            locked_vms.append({"node": node['node'], "vmid": vm['vmid'], "name": vm['name']})
+
+print(f"Found {len(locked_vms)} locked VMs:")
+for v in locked_vms:
+    print(f" - Node: {v['node']} | VMID: {v['vmid']} | Name: {v['name']}")
+```
