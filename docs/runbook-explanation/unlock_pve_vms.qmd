@@ -1,4 +1,3 @@
-```yaml
 ---
 title: "Proxmox Knowledge Base: Understanding & Fixing `locked: backup`"
 author: "SRE Infrastructure Team"
@@ -12,7 +11,7 @@ execute:
   echo: true
   warning: false
 ---
-```
+
 ## Incident Overview 
 
 When a Proxmox Backup Server (PBS) backup is interrupted (usually via network timeout), the Proxmox hypervisor may fail to drop the `backup` lock on the VM configuration file (`/etc/pve/qemu-server/<vmid>.conf`). 
