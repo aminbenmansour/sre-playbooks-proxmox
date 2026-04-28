@@ -9,7 +9,12 @@ book:
   # if project.type = 'book' value set to 'chapters'
   chapters:
     - index.qmd
-    - docs/runbook-explanation/unlock_pve_vms.qmd
+    - part: "Runbook Explanations"
+      chapters:
+        - docs/runbook-explanation/unlock_pve_vms.qmd
+    - part: "Incident Reviews"
+      chapters:
+        - docs/incident-reviews/unlock_pve_vms.qmd
 
 format:
   html:
