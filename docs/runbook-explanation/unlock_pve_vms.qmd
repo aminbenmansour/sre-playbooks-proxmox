@@ -41,7 +41,7 @@ Do **not** use the GUI to blindly unlock the VM. Follow the [Jupyter Runbook for
 ## Under the Hood: The Safety Guardrail
 Our `lib/pve_safety.py` library queries the `/api2/json/nodes/{node}/tasks` endpoint. If any task matches `type: vzdump` and the `vmid`, we block the unlock command to prevent corrupting the `QCOW2/RBD` image.
 
-```python
+```{python}
 #| eval: false
 # Core safety logic abstraction
 tasks = proxmox.nodes(node).tasks.get()
