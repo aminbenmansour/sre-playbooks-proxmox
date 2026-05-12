@@ -11,10 +11,10 @@ book:
     - index.qmd
     - part: "Runbook Explanations"
       chapters:
-        - docs/runbook-explanation/unlock_pve_vms.qmd
+        - runbook-explanation/unlock_pve_vms.qmd
     - part: "Incident Reviews"
       chapters:
-        - docs/incident-reviews/unlock_pve_vms.qmd
+        - incident-reviews/unlock_pve_vms.qmd
 
 format:
   html:
