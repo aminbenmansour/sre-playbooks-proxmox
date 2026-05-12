@@ -27,10 +27,10 @@ Navigate using the sidebar. Each runbook is self-contained and includes:
 
 | Runbook | Description |
 |---|---|
-| [Unlock PVE VMs](docs/runbook-explanation/unlock_pve_vms.qmd) | How to unlock stuck or locked VMs in Proxmox |
+| [Unlock PVE VMs](runbook-explanation/unlock_pve_vms.qmd) | How to unlock stuck or locked VMs in Proxmox |
 
 ## Incident Reviews
 
 | Review | Description |
 |---|---|
-| [VM Locked After Backup Failure](docs/incident-reviews/unlock_pve_vms.qmd) | Post-mortem log for `locked: backup` incidents |
+| [VM Locked After Backup Failure](incident-reviews/unlock_pve_vms.qmd) | Post-mortem log for `locked: backup` incidents |
