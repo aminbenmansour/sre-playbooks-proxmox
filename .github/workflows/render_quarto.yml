@@ -28,18 +28,21 @@ jobs:
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
-
+      
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      
       - name: Render Quarto Project
         run: |
           cd docs
           quarto render
 
       - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs/_site/  # Quarto's default output directory
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v5
         

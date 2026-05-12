@@ -1,20 +1,37 @@
 project:
-  type: book  # or 'website' if you prefer
+  # takes the following values:
+  # * 'book': publishes output to docs/_book/
+  # * 'website': publishes output to docs/_site/
+  type: website
 
-book:
+# if project.type = 'website' value set to 'navbar' or 'sidebar'
+# if project.type = 'book' value set to 'chapters'
+
+website:
   title: "SRE Playbooks – Proxmox"
-  author: "Amine GmbH"
-  date: today
-  # if project.type = 'website' value set to 'navbar' or 'sidebar'
-  # if project.type = 'book' value set to 'chapters'
-  chapters:
-    - index.qmd
-    - part: "Runbook Explanations"
-      chapters:
-        - docs/runbook-explanation/unlock_pve_vms.qmd
-    - part: "Incident Reviews"
-      chapters:
-        - docs/incident-reviews/unlock_pve_vms.qmd
+  sidebar:
+    search: true
+    contents:
+      - index.qmd
+      - section: "Runbook Explanations"
+        contents:
+          - runbook-explanation/unlock_pve_vms.qmd
+      - section: "Incident Reviews"
+        contents:
+          - incident-reviews/unlock_pve_vms.qmd
+
+# book:
+#   title: "SRE Playbooks – Proxmox"
+#   author: "Amine GmbH"
+#   date: today
+#   chapters:
+#     - index.qmd
+#     - part: "Runbook Explanations"
+#       chapters:
+#         - runbook-explanation/unlock_pve_vms.qmd
+#     - part: "Incident Reviews"
+#       chapters:
+#         - incident-reviews/unlock_pve_vms.qmd
 
 format:
   html:
