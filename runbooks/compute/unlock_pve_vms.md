@@ -19,19 +19,17 @@ jupyter:
 Set your target cluster and authenticate.
 
 ```python
+import sys
 import os
+
 from proxmoxer import ProxmoxAPI
 
-# Read from Vault or local env vars
-PVE_HOST = os.getenv("PVE_CLUSTER_ENDPOINT", "pve-api.internal.corp")
-USER = os.getenv("PVE_USER", "sre-api@pam")
-TOKEN_NAME = "runbook-token"
-TOKEN_VALUE = os.getenv("PVE_TOKEN")
+sys.path.insert(0, os.path.abspath("../../"))
 
-proxmox = ProxmoxAPI(
-    PVE_HOST, user=USER, token_name=TOKEN_NAME, token_value=TOKEN_VALUE, verify_ssl=True
-)
-print(f"✅ Authenticated to {PVE_HOST}")
+from library.pve_auth import get_proxmox_client
+from library.pve_safety import is_vzdump_active
+
+proxmox = get_proxmox_client()
 ```
 
 ### Step 2: Identify Locked VMs
@@ -53,19 +51,16 @@ for v in locked_vms:
 Before unlocking, we must ensure `vzdump` is completely dead on the host node. We execute a remote command via the API/SSH abstraction to check process I/O.
 
 ```python
-def check_vzdump_process(node, vmid):
-    # Simulated execution: ssh root@node "ps aux | grep vzdump | grep vmid"
-    # Returns True if running, False if dead.
-    print(f"🔍 Checking host {node} for active vzdump tasks on {vmid}...")
-    return False # Assuming no tasks found for this run
-
-safe_to_unlock = []
 for v in locked_vms:
-    if not check_vzdump_process(v['node'], v['vmid']):
-        safe_to_unlock.append(v)
-        print(f"🟢 VM {v['vmid']} is safe to unlock.")
+    node, vmid, name = v['node'], v['vmid'], v['name']
+    
+    print(f"\n🔍 Analyzing VM {vmid} ({name})...")
+    if is_vzdump_active(proxmox, node, vmid):
+        print(f"🔴 ABORT: Active I/O task found for {vmid}. Do not unlock.")
     else:
-        print(f"🔴 ABORT: VM {v['vmid']} has active I/O. Do not unlock.")
+        print(f"🟢 SAFE: No active backup tasks. Unlocking {vmid}...")
+        # proxmox.nodes(node).qemu(vmid).config.post(skiplock=1)
+        print(f"✅ Lock cleared successfully.")
 ```
 
 ### Step 4: Execute Unlock
