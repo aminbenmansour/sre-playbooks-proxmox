@@ -53,7 +53,7 @@ Before unlocking, we must ensure `vzdump` is completely dead on the host node. W
 ```python
 for v in locked_vms:
     node, vmid, name = v['node'], v['vmid'], v['name']
-    
+
     print(f"\n🔍 Analyzing VM {vmid} ({name})...")
     if is_vzdump_active(proxmox, node, vmid):
         print(f"🔴 ABORT: Active I/O task found for {vmid}. Do not unlock.")

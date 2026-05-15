@@ -28,10 +28,10 @@ jobs:
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
-      
+
       - name: Install Python dependencies
         run: pip install -r requirements/docs.txt
-      
+
       - name: Render Quarto Project
         run: |
           cd docs
@@ -45,4 +45,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
-        
