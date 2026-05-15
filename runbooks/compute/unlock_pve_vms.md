@@ -2,9 +2,12 @@
 jupyter:
   jupytext:
     formats: ipynb,md
+    main_language: python
     text_representation:
       extension: .md
       format_name: markdown
+      format_version: '1.3'
+      jupytext_version: 1.19.1
 ---
 
 # Runbook: Remediate `locked: backup` State on PVE VMs
