@@ -1,0 +1,42 @@
+name: Test Runbooks and Libraries
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      # Only run if notebooks or helper functions changes
+      - 'runbooks/**'
+      - 'library/**'
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  test-python-and-notebooks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python 3.14
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.14"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install jupytext proxmoxer flake8 black
+
+    - name: Lint Python Code with Flake8
+      run: |
+        flake8 lib/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Check Python formatting with Black
+      run: |
+        black --check lib/
+
+    - name: Validate Jupytext Markdown formatting
+      run: |
+        # Ensures all .md runbooks are valid jupytext files
+        jupytext --test runbooks/**/*.md
