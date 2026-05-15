@@ -2,5 +2,6 @@
 
 jupytext
 proxmoxer
+pre-commit
 flake8
 black

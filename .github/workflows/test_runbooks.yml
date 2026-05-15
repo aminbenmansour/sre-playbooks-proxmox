@@ -26,15 +26,17 @@ jobs:
     - name: Install Python dependencies
       run: pip install -r requirements/testing.txt
 
-    - name: Lint Python Code with Flake8
-      run: |
-        flake8 library/ --count --select=E9,F63,F7,F82 --show-source --statistics
+    - name: Set up Python 3.14
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.14"
 
-    - name: Check Python formatting with Black
-      run: |
-        black --check library/
+    - name: Install Python dependencies
+      run: pip install -r requirements/testing.txt
+
+    - name: Run pre-commit checks
+      uses: pre-commit/action@v3.0.1
 
     - name: Validate Jupytext Markdown formatting
       run: |
-        # Ensures all .md runbooks are valid jupytext files
         jupytext --test runbooks/**/*.md
