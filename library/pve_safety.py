@@ -1,4 +1,5 @@
 import logging
+
 from proxmoxer import ProxmoxAPI
 
 logger = logging.getLogger(__name__)
@@ -35,4 +36,3 @@ def is_vzdump_active(
         logger.error("Failed to query tasks on node %s: %s", node, exc)
         # Fail safe: if the query fails, assume a backup may be running.
         return True
-        

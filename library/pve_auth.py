@@ -1,8 +1,10 @@
-import os
 import logging
+import os
+
 from proxmoxer import ProxmoxAPI
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
 
 def get_proxmox_client():
     """Authenticates to Proxmox API using environment variables."""
@@ -12,7 +14,9 @@ def get_proxmox_client():
     token_value = os.getenv("PVE_TOKEN")
 
     if not all([host, user, token_name, token_value]):
-        raise ValueError("❌ Missing required PVE environment variables. Check your vault/env.")
+        raise ValueError(
+            "❌ Missing required PVE environment variables. Check your vault/env."
+        )
 
     logging.info(f"Authenticating to PVE Cluster at {host} as {user}...")
     return ProxmoxAPI(

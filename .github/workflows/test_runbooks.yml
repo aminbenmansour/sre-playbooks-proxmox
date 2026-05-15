@@ -1,0 +1,51 @@
+name: Test Runbooks and Libraries
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      # Only run if notebooks or helper functions changes
+      - 'runbooks/**'
+      - 'library/**'
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  test-python-and-notebooks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python 3.14
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.14"
+
+    - name: Install Python dependencies
+      run: pip install -r requirements/testing.txt
+
+    - name: Set up Python 3.14
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.14"
+
+    - name: Install Python dependencies
+      run: pip install -r requirements/testing.txt
+
+    - name: Run pre-commit checks
+      uses: pre-commit/action@v3.0.1
+
+    - name: Validate Jupytext Markdown formatting
+      run: |
+        # jupytext --check "cmd {}" works by:
+        # 1. Converting the .md file to a notebook in memory
+        # 2. Running cmd {} where {} is replaced with the converted notebook path
+        # 3. Failing if the command exits non-zero
+
+        # cat just reads the file and exits 0 — so it's essentially a no-op check command.
+        # The real validation happens in step 1 — if jupytext can't parse the markdown
+        # into a valid notebook, it fails before cat ever runs.
+
+        jupytext --check "cat {}" runbooks/**/*.md

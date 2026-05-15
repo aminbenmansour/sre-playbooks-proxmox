@@ -12,9 +12,9 @@ execute:
   warning: false
 ---
 
-## Incident Overview 
+## Incident Overview
 
-When a Proxmox Backup Server (PBS) backup is interrupted (usually via network timeout), the Proxmox hypervisor may fail to drop the `backup` lock on the VM configuration file (`/etc/pve/qemu-server/<vmid>.conf`). 
+When a Proxmox Backup Server (PBS) backup is interrupted (usually via network timeout), the Proxmox hypervisor may fail to drop the `backup` lock on the VM configuration file (`/etc/pve/qemu-server/<vmid>.conf`).
 
 The VM will remain running, but SREs cannot migrate, resize, or reboot the VM until the lock is cleared. That behavior protects against the corruption of the QEMU dirty-bitmap tracking used for incremental backups.
 
