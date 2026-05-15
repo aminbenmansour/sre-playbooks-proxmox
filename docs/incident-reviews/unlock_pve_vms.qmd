@@ -60,5 +60,5 @@ This document tracks real incidents where VMs were left in a `locked: backup` st
 
 ## References
 - [Runbook Explanation — Understanding the Lock](../runbook-explanation/unlock_pve_vms.qmd)
-- [Remediation Runbook — unlock_pve_vms.md](../../runbooks/compute/unlock_pve_vms.md)
+- [Remediation Runbook — unlock_pve_vms.md](https://github.com/aminbenmansour/sre-playbooks-proxmox/blob/main/runbooks/compute/unlock_pve_vms.md)
 - [Proxmox Backup Locking Docs](https://pve.proxmox.com/wiki/Backup_and_Restore)
