@@ -24,13 +24,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
       
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements/docs.txt
       
       - name: Render Quarto Project
         run: |

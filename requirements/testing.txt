@@ -1,0 +1,6 @@
+-r base.txt
+
+jupytext
+proxmoxer
+flake8
+black
