@@ -32,10 +32,10 @@ jobs:
     - name: Run pre-commit checks
       uses: pre-commit/action@v3.0.1
       with:
-        extra_args: --hook-stage manual trailing-whitespace end-of-file-fixer check-yaml isort black
+        extra_args: --hook-stage manual --hook trailing-whitespace --hook end-of-file-fixer --hook check-yaml --hook isort --hook black
 
     - name: Run flake8
-      run: flake8 --count --select=E9,F63,F7,F82 --show-source --statistics library/
+      run: flake8 --count --select=E9,F63,F7,F82 --show-source --statistics library/ tests/
 
     - name: Execute Pytest Suite
       run: PYTHONPATH=. pytest tests/ -v --durations=5
