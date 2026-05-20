@@ -1,7 +1,9 @@
 -r base.txt
 
-jupytext
 proxmoxer
-pre-commit
+
 flake8
-black
+
+pytest
+pytest-mock
+nbqa
