@@ -1,0 +1,44 @@
+name: Test Library
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      # Only run if helper functions or their tests changes
+      - 'library/**'
+      - 'tests/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'library/**'
+      - 'tests/**'
+
+  workflow_dispatch:
+
+jobs:
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python 3.14
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.14"
+
+    - name: Install Python dependencies
+      run: pip install -r requirements/testing.txt
+
+    - name: Run pre-commit formatting checks
+      run: |
+        pre-commit run trailing-whitespace --all-files
+        pre-commit run end-of-file-fixer --all-files
+        pre-commit run check-yaml --all-files
+        pre-commit run isort --all-files
+        pre-commit run black --all-files
+
+    - name: Run flake8
+      run: flake8 --count --select=E9,F63,F7,F82 --show-source --statistics library/ tests/
+
+    - name: Execute Pytest Suite
+      run: PYTHONPATH=. pytest tests/ -v --durations=5
