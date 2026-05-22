@@ -14,7 +14,7 @@ The project is structured to separate production-ready runbooks, automation logi
 | `tests/` | PyTest suite ensuring the reliability of automation scripts before execution. |
 | `.github/workflows/	` | CI/CD pipelines for testing, linting, and auto-publishing to GitHub Pages. |
 
-# 🛠 Technology Stack
+# 🏗️ Technology Stack
 This project uses a layered approach to ensure infrastructure changes are safe, repeatable, and well-documented.
 * **Platform**: Proxmox Virtual Environment (`PVE`) and Proxmox Backup Server (`PBS`).
 * **Automation**: Python 3.10+.
@@ -45,4 +45,39 @@ pip install -r requirements/base.txt -r requirements/testing.txt -r requirements
 
 # Install Git pre-commit hooks
 pre-commit install
+```
+# 🛠️ On-Call & Incident Response Workflow
+When an alert fires or a cluster anomaly is detected, use this workflow to mitigate the issue:
+
+## Step 1: Locate the Runbook
+Navigate directly to the `runbooks/` directory or search the rendered GitHub Pages documentation portal. Runbooks are structured strictly by engineering domains (e.g., `compute/`, `network/`, `storage/`).
+
+## Step 2: Run Pre-Flight Validation
+Before applying destructive commands (such as clearing cluster locks), invoke the Python safety module to verify cluster health and avoid split-brain scenarios:
+```bash
+export PVE_CLUSTER_ENDPOINT="https://pve-cluster.example.com"
+export PVE_USER="sre-api@pam"
+export PVE_TOKEN_ID="monitoring@pve!sre-token"
+export PVE_TOKEN="super-secret-token"
+
+# Verify API connectivity and cluster quorum safety
+python3 -m library.pve_safety --check-quorum
+```
+
+### Step 3: Execute Recovery Steps
+Open the relevant markdown file (e.g., `runbooks/compute/unlock_pve_vms.md`) and follow the triage tree. Runbooks utilize clear, declarative blocks:
+* **Symptoms**: High-level log entries or GUI patterns confirming the issue.
+* **Impact**: Criticality assessment of what services or nodes are degraded.
+* **Mitigation**: Safe, sequential commands to restore standard operational capabilities.
+
+# 📖 Documentation Portal (Quarto & GitHub Pages)
+The public documentation is authored using Quarto and hosted automatically via GitHub Pages using the `.github/workflows/render_quarto.yml` action. It maps raw operational runbooks into highly readable explanatory guides and tracking records.
+
+* `docs/runbook-explanation/`: Contains the theoretical background and architectural risks behind running automated recovery commands.
+
+* `docs/incident-reviews/`: Holds internal blameless post-mortems to ensure continuous learning from edge-case failures.
+
+To serve and preview the documentation portal locally with hot-reloading:
+```bash
+quarto preview docs
 ```
