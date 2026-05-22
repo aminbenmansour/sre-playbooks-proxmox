@@ -23,3 +23,26 @@ This project uses a layered approach to ensure infrastructure changes are safe, 
   * **PyTest**: For mocking API states and verifying recovery logic.
   * **Pre-commit**: For enforcing code quality (`Black`/`Flake8`).
 * **Deployment**: GitHub Actions for automated documentation rendering and testing coverage.
+
+# 🚀 Getting Started
+## Prerequisites
+Ensure your local environment matches the production runtime constraints:
+* Python 3.10+
+* Quarto CLI (for local documentation preview)
+* Pre-commit (pip install pre-commit)
+
+## Environment Setup
+Clone the repository and initialize the virtual environment alongside formatting hooks:
+```bash
+# Clone the repository
+git clone https://github.com/aminbenmansour/proxmox-sre-playbooks.git
+cd proxmox-sre-playbooks
+
+# Setup Python environment
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements/base.txt -r requirements/testing.txt -r requirements/formatting.txt
+
+# Install Git pre-commit hooks
+pre-commit install
+```
