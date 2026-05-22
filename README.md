@@ -81,3 +81,24 @@ To serve and preview the documentation portal locally with hot-reloading:
 ```bash
 quarto preview docs
 ```
+
+# 🧪 Testing & Code Quality
+To guarantee automation logic never compounds a live incident, all code alterations must pass comprehensive local validation frameworks:
+
+* Static Analysis & Linting: Managed automatically via .pre-commit-config.yaml using `Black` and `Flake8`.
+* Unit Testing: Driven via `pytest` to mock Proxmox API failure modes, state responses, and validation boundaries.
+* Execute the test suite locally:
+```bash
+pytest --cov=library tests/
+```
+
+# 🤝 Contributing
+Because this repository is public, contributions that improve cluster resilience are welcome. Please adhere to these guidelines:
+1. All Python code modifications must include corresponding tests within the `tests/` path.
+2. New runbooks must follow the uniform standard: Problem Statement --> Diagnostic Check --> Safe Resolution.
+3. Ensure the pre-commit hook runs successfully before opening a Pull Request.
+
+## 🛡️ License
+This project is licensed under the [LICENSE](./LICENSE) file included in this repository.
+
+Currently **Apache License Version 2.0**.
