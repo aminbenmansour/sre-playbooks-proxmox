@@ -10,7 +10,7 @@ format:
 ---
 
 ## Purpose
-This document tracks real incidents where VMs were left in a `locked: backup` state after a failed PBS backup. Each entry links back to the [runbook explanation](../runbook-explanation/unlock_pve_vms.qmd) and the [remediation runbook](../../runbooks/compute/unlock_pve_vms.md).
+This document tracks real incidents where VMs were left in a `locked: backup` state after a failed PBS backup. Each entry links back to the [runbook explanation](../runbook-explanation/unlock_pve_vms.qmd) and the [remediation runbook](../../runbooks/compute/unlock_pve_vms.py).
 
 ---
 
@@ -26,7 +26,7 @@ This document tracks real incidents where VMs were left in a `locked: backup` st
 | **Impact** | VM online but unmigrateable for ~40 min |
 | **Resolved by** | Manual lock clear via runbook after confirming no active vzdump task |
 | **Resolution time** | 40 minutes |
-| **Runbook followed** | Yes — `unlock_pve_vms.md` |
+| **Runbook followed** | Yes — `unlock_pve_vms.py` |
 | **Safety check passed** | Yes — no active `vzdump` task found |
 
 **Timeline:**
@@ -60,5 +60,5 @@ This document tracks real incidents where VMs were left in a `locked: backup` st
 
 ## References
 - [Runbook Explanation — Understanding the Lock](../runbook-explanation/unlock_pve_vms.qmd)
-- [Remediation Runbook — unlock_pve_vms.md](https://github.com/aminbenmansour/sre-playbooks-proxmox/blob/main/runbooks/compute/unlock_pve_vms.md)
+- [Remediation Runbook — unlock_pve_vms.py](https://github.com/aminbenmansour/sre-playbooks-proxmox/blob/main/runbooks/compute/unlock_pve_vms.py)
 - [Proxmox Backup Locking Docs](https://pve.proxmox.com/wiki/Backup_and_Restore)
