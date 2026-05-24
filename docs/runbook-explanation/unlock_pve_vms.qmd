@@ -36,10 +36,10 @@ sequenceDiagram
 ```
 
 ## Remediation Protocol
-Do **not** use the GUI to blindly unlock the VM. Follow the [Jupyter Runbook for VM Unlocking](../../runbooks/compute/unlock_pve_vms.md).
+Do **not** use the GUI to blindly unlock the VM. Follow the interactive runbook below.
 
 ## Under the Hood: The Safety Guardrail
-Our `lib/pve_safety.py` library queries the `/api2/json/nodes/{node}/tasks` endpoint. If any task matches `type: vzdump` and the `vmid`, we block the unlock command to prevent corrupting the `QCOW2/RBD` image.
+Our `library/pve_safety.py` module queries the `/api2/json/nodes/{node}/tasks` endpoint. If any task matches `type: vzdump` and the `vmid`, we block the unlock command to prevent corrupting the `QCOW2/RBD` image.
 
 ```{python}
 #| eval: false
@@ -48,4 +48,37 @@ tasks = proxmox.nodes(node).tasks.get()
 for task in tasks:
     if task['status'] == 'running' and task['type'] == 'vzdump':
         raise Exception("Unsafe to unlock!")
+```
+
+## Running the Runbook Locally
+
+The interactive runbook runs as a local Marimo app that calls your real Proxmox API directly. No credentials ever leave your machine.
+
+### Launch it
+
+```bash
+# From the repo root — ensure your PVE env vars are exported first
+export PVE_CLUSTER_ENDPOINT="https://pve-cluster.example.com"
+export PVE_USER="sre-api@pam"
+export PVE_TOKEN_NAME="runbook-token"
+export PVE_TOKEN="your-token-here"
+
+marimo run runbooks/compute/unlock_pve_vms.py
+```
+
+Marimo starts on `http://localhost:2718` by default. The frame below connects to it automatically once it is running.
+
+```{=html}
+<div style="border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; margin-top: 1rem;">
+  <div style="background: #f8f9fa; padding: 8px 14px; font-size: 0.8rem; color: #6c757d; border-bottom: 1px solid #dee2e6;">
+    ⚡ Interactive runbook — requires <code>marimo run runbooks/compute/unlock_pve_vms.py</code> running locally
+  </div>
+  <iframe
+    src="http://localhost:2718"
+    width="100%"
+    height="720px"
+    style="border: none; display: block;"
+    title="Unlock PVE VMs — interactive runbook">
+  </iframe>
+</div>
 ```

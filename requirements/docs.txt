@@ -1,5 +1,9 @@
 -r base.txt
 
+proxmoxer
+
+marimo
+
 jupyter
 nbformat
 nbclient

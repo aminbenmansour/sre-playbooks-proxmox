@@ -1,3 +1,4 @@
+
 ---
 title: "SRE Playbooks – Proxmox"
 subtitle: "Operational runbooks and incident post-mortems for the Proxmox infrastructure"
@@ -22,6 +23,12 @@ Navigate using the sidebar. Each runbook is self-contained and includes:
 2. Step-by-step instructions
 3. Rollback / recovery steps
 4. Related incidents
+
+> **On-call:** Before opening any runbook page, start the local runbook server:
+> ```bash
+> marimo run runbooks/compute/unlock_pve_vms.py
+> ```
+> Keep that terminal open so the embedded interactive runbook loads inside the docs.
 
 ## Runbooks
 
