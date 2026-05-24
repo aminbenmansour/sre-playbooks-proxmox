@@ -4,7 +4,6 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      # Only run if notebooks changes
       - 'runbooks/**'
   pull_request:
     branches: [ "main" ]
@@ -32,6 +31,9 @@ jobs:
 
     - name: Validate Jupytext Markdown formatting
       run: |
+        # Only validate .md runbooks — .py Marimo apps are validated by the
+        # test_libraries workflow via flake8 and pre-commit instead.
+
         # jupytext --check "cmd {}" works by:
         # 1. Converting the .md file to a notebook in memory
         # 2. Running cmd {} where {} is replaced with the converted notebook path
@@ -41,4 +43,26 @@ jobs:
         # The real validation happens in step 1 — if jupytext can't parse the markdown
         # into a valid notebook, it fails before cat ever runs.
 
-        jupytext --check "cat {}" runbooks/**/*.md
+        shopt -s globstar nullglob
+        md_files=(runbooks/**/*.md)
+        if [ ${#md_files[@]} -gt 0 ]; then
+          jupytext --check "cat {}" "${md_files[@]}"
+        else
+          echo "No Jupytext .md runbooks found — skipping."
+        fi
+
+  validate-marimo:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python 3.14
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.14"
+
+    - name: Install Python dependencies
+      run: pip install -r requirements/docs.txt
+
+    - name: Validate Marimo runbook syntax
+      run: python -m compileall runbooks
