@@ -110,13 +110,13 @@ def _(is_vzdump_active, locked_vms, mo, proxmox):
                 safe_to_unlock.append(v)
 
     rows = []
-    for v in locked_vms:
-        is_blocked = v in blocked
+    for _v in locked_vms:
+        is_blocked = _v in blocked
         rows.append(
             {
-                "vmid": v["vmid"],
-                "name": v["name"],
-                "node": v["node"],
+                "vmid": _v["vmid"],
+                "name": _v["name"],
+                "node": _v["node"],
                 "status": (
                     "🔴 ABORT — active I/O" if is_blocked else "🟢 Safe to unlock"
                 ),
@@ -151,20 +151,24 @@ def _(confirm, mo, proxmox, safe_to_unlock):
     results = []
 
     if confirm.value and proxmox:
-        for v in safe_to_unlock:
+        for _v in safe_to_unlock:
             try:
                 # Uncomment the line below to perform the actual unlock:
                 # proxmox.nodes(v["node"]).qemu(v["vmid"]).config.post(skiplock=1)
                 results.append(
                     {
-                        "vmid": v["vmid"],
-                        "name": v["name"],
+                        "vmid": _v["vmid"],
+                        "name": _v["name"],
                         "result": "✅ Lock cleared (dry run)",
                     }
                 )
             except Exception as e:
                 results.append(
-                    {"vmid": v["vmid"], "name": v["name"], "result": f"❌ Failed: {e}"}
+                    {
+                        "vmid": _v["vmid"],
+                        "name": _v["name"],
+                        "result": f"❌ Failed: {e}",
+                    }
                 )
 
     if not confirm.value:
