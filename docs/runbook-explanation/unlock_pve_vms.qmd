@@ -50,23 +50,9 @@ for task in tasks:
         raise Exception("Unsafe to unlock!")
 ```
 
-## Running the Runbook Locally
+## Interactive Runbook
 
-The interactive runbook runs as a local Marimo app that calls your real Proxmox API directly. No credentials ever leave your machine.
-
-### Launch it
-
-```bash
-# From the repo root — ensure your PVE env vars are exported first
-export PVE_CLUSTER_ENDPOINT="https://pve-cluster.example.com"
-export PVE_USER="sre-api@pam"
-export PVE_TOKEN_NAME="runbook-token"
-export PVE_TOKEN="your-token-here"
-
-marimo run runbooks/compute/unlock_pve_vms.py
-```
-
-Marimo starts on `http://localhost:2718` by default. The frame below connects to it automatically once it is running.
+The runbook runs as a local Marimo app that calls your real Proxmox API directly. No credentials ever leave your machine.
 
 ```{=html}
 <div style="border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; margin-top: 1rem;">
@@ -74,11 +60,84 @@ Marimo starts on `http://localhost:2718` by default. The frame below connects to
     ⚡ Interactive runbook — requires <code>marimo run runbooks/compute/unlock_pve_vms.py</code> running locally
   </div>
   <iframe
+    id="marimo-frame"
     src="http://localhost:2718"
     width="100%"
     height="720px"
     style="border: none; display: block;"
     title="Unlock PVE VMs — interactive runbook">
   </iframe>
+  <div id="marimo-offline" style="display:none; padding: 2.5rem 2rem; background:#fff8f0; font-family: inherit;">
+
+    <div style="max-width: 520px; margin: 0 auto; text-align: center;">
+      <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">⚙️</div>
+      <p style="margin: 0 0 0.25rem; font-weight: 700; font-size: 1.1rem; color: #343a40;">
+        Runbook server not running
+      </p>
+      <p style="margin: 0 0 1.5rem; font-size: 0.875rem; color: #6c757d;">
+        Export your credentials and start Marimo, then click Retry below.
+      </p>
+
+      <div style="background:#1e1e2e; border-radius:8px; padding: 1rem 1.25rem; text-align:left; margin-bottom:1.5rem; position:relative;">
+        <div style="font-size:0.7rem; color:#6c7086; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.05em;">terminal</div>
+        <pre style="margin:0; color:#cdd6f4; font-size:0.82rem; line-height:1.7; overflow-x:auto;">export PVE_CLUSTER_ENDPOINT="https://pve-cluster.example.com"
+export PVE_USER="sre-api@pam"
+export PVE_TOKEN_NAME="runbook-token"
+export PVE_TOKEN="your-token-here"
+
+marimo run runbooks/compute/unlock_pve_vms.py</pre>
+      </div>
+
+      <button
+        onclick="retryMarimo()"
+        style="
+          background: #2563eb; color: white; border: none;
+          padding: 0.6rem 1.5rem; border-radius: 6px;
+          font-size: 0.875rem; font-weight: 600;
+          cursor: pointer; transition: background 0.2s;
+        "
+        onmouseover="this.style.background='#1d4ed8'"
+        onmouseout="this.style.background='#2563eb'"
+      >
+        ↻ &nbsp;Retry connection
+      </button>
+      <p style="margin: 0.75rem 0 0; font-size: 0.75rem; color:#adb5bd;">
+        Marimo starts on <code>http://localhost:2718</code> by default.
+      </p>
+    </div>
+
+  </div>
 </div>
+
+<script>
+  const frame   = document.getElementById("marimo-frame");
+  const offline = document.getElementById("marimo-offline");
+
+  function showOffline() {
+    frame.style.display   = "none";
+    offline.style.display = "block";
+  }
+
+  function showOnline() {
+    offline.style.display = "none";
+    frame.style.display   = "block";
+  }
+
+  function retryMarimo() {
+    fetch("http://localhost:2718", { mode: "no-cors" })
+      .then(() => {
+        frame.src = "http://localhost:2718";
+        showOnline();
+      })
+      .catch(() => {
+        const btn = document.querySelector("#marimo-offline button");
+        btn.textContent = "Still unreachable — try again";
+        setTimeout(() => { btn.innerHTML = "↻ &nbsp;Retry connection"; }, 2500);
+      });
+  }
+
+  fetch("http://localhost:2718", { mode: "no-cors" })
+    .then(() => { /* reachable — leave iframe visible */ })
+    .catch(() => showOffline());
+</script>
 ```
