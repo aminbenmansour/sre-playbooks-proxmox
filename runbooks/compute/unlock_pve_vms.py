@@ -37,7 +37,12 @@ def _():
     import os
     import sys
 
-    sys.path.insert(0, os.path.abspath("../../"))
+    # Always resolves to repo root regardless of launch directory
+    repo_root = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
+    if repo_root not in sys.path:
+        sys.path.insert(0, repo_root)
 
     from library.pve_auth import get_proxmox_client
 
