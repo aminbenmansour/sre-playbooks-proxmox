@@ -1,0 +1,37 @@
+name: PR Preview – SRE Knowledge Base
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - 'docs/**'
+
+permissions:
+  contents: write        # needed to push to gh-pages branch
+  pull-requests: write   # needed to post the comment
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Install Python dependencies
+        run: pip install -r requirements/docs.txt
+
+      - name: Render Quarto Project
+        run: |
+          cd docs
+          quarto render
+
+      - name: Deploy preview to gh-pages subfolder
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_site
+          destination_dir: previews/pr-${{ github.event.number }}
+          keep_files: true   # don't wipe other previews
