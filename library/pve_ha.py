@@ -54,3 +54,75 @@ def _extract_fencing_tasks(tasks: list[dict]) -> list[FencingEvent]:
                 )
             )
     return events
+
+
+def detect_ha_fencing_loop(
+    proxmox_client: ProxmoxAPI,
+    node: str,
+    since_epoch: int,
+    threshold: int = FENCING_LOOP_THRESHOLD,
+) -> FencingLoopReport:
+    """
+    Return a FencingLoopReport describing whether any cluster node has been
+    fenced more than *threshold* times since *since_epoch*.
+
+    Parameters
+    ----------
+    proxmox_client:
+        Authenticated ProxmoxAPI instance.
+    node:
+        The PVE node whose task log is queried (cluster-wide task history is
+        accessible from any node).
+    since_epoch:
+        Lower-bound Unix timestamp.  Only fence events at or after this time
+        are counted.  Callers typically pass ``int(time.time()) - 3600`` for
+        a one-hour observation window.
+    threshold:
+        Number of fence events that triggers a loop classification.
+        Defaults to FENCING_LOOP_THRESHOLD (3).
+
+    Fail-safe behaviour
+    -------------------
+    If the API call fails for any reason, the function returns a report that
+    marks the situation as unsafe (``is_safe == False``) and logs the error,
+    consistent with the fail-safe paradigm used throughout this library.
+    """
+    report = FencingLoopReport()
+
+    try:
+        tasks = proxmox_client.nodes(node).tasks.get()
+    except Exception as exc:
+        logger.error(
+            "Failed to retrieve task list from node %s: %s — assuming unsafe.",
+            node,
+            exc,
+        )
+        # Fail safe: treat as if a loop is active so callers block remediation.
+        report.looping_nodes.append("UNKNOWN")
+        return report
+
+    fence_events = _extract_fencing_tasks(tasks)
+
+    # Group events per fenced node, filtering to the observation window.
+    events_by_node: dict[str, list[FencingEvent]] = {}
+    for event in fence_events:
+        if event.start_time >= since_epoch:
+            events_by_node.setdefault(event.node, []).append(event)
+
+    report.events_by_node = events_by_node
+
+    for fenced_node, node_events in events_by_node.items():
+        count = len(node_events)
+        if count >= threshold:
+            logger.warning(
+                "Fencing loop detected: node %s has been fenced %d time(s) "
+                "since epoch %d (threshold: %d). UPIDs: %s",
+                fenced_node,
+                count,
+                since_epoch,
+                threshold,
+                [e.upid for e in node_events],
+            )
+            report.looping_nodes.append(fenced_node)
+
+    return report
