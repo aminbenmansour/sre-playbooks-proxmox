@@ -1,5 +1,5 @@
 ---
-title: "Proxmox Knowledge Base: Understanding HA Fencing Loops"
+title: "Understanding HA Fencing Loops"
 author: "SRE Infrastructure Team"
 date: today
 format:
