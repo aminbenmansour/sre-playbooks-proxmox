@@ -16,7 +16,7 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     steps:
-      - uses: github/branch-deploy@v11.1.2
+      - uses: github/branch-deploy@v11
         id: branch-deploy
         with:
           trigger: ".deploy"
@@ -27,7 +27,7 @@ jobs:
           skip_reviews: "staging"
           environment_urls: "staging|https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/previews/pr-${{ github.event.issue.number }}/"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: ${{ steps.branch-deploy.outputs.continue == 'true' }}
         with:
           ref: ${{ steps.branch-deploy.outputs.sha }}
