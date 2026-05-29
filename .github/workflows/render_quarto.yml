@@ -2,9 +2,9 @@ name: Publish SRE Knowledge Base
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - 'docs/**'  # Only run if documentation changes
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
