@@ -2,15 +2,13 @@ name: Publish SRE Knowledge Base
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
     paths:
       - 'docs/**'
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: "pages"
@@ -19,8 +17,8 @@ concurrency:
 jobs:
   build-and-deploy:
     environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      name: production
+      # url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -37,11 +35,27 @@ jobs:
           cd docs
           quarto render
 
-      - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: docs/_site/  # Quarto's default output directory
-
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_site
+          destination_dir: .
+          keep_files: true
+
+# permissions:
+#   contents: read
+#   pages: write
+#   id-token: write
+
+# concurrency:
+#   group: "pages"
+#   cancel-in-progress: true
+#       - name: Upload Artifact
+#         uses: actions/upload-pages-artifact@v5
+#         with:
+#           path: docs/_site/  # Quarto's default output directory
+
+#       - name: Deploy to GitHub Pages
+#         id: deployment
+#         uses: actions/deploy-pages@v5
