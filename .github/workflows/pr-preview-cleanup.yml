@@ -18,12 +18,12 @@ jobs:
 
       - name: Remove preview folder
         run: |
-          if [ -d "previews/pr-${{ github.event.number }}" ]; then
+          if [ -d "staging/pr-${{ github.event.number }}" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git rm -rf "previews/pr-${{ github.event.number }}"
-            git commit -m "chore: remove preview for PR #${{ github.event.number }}"
+            git rm -rf "staging/pr-${{ github.event.number }}"
+            git commit -m "chore: remove staging preview for PR #${{ github.event.number }}"
             git push
           else
-            echo "No preview folder found, skipping."
+            echo "No staging preview folder found, skipping."
           fi
