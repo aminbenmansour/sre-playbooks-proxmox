@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: "pages"
@@ -17,8 +19,8 @@ concurrency:
 jobs:
   build-and-deploy:
     environment:
-      name: production
-      # url: ${{ steps.deployment.outputs.page_url }}
+      name: Production
+      url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -35,13 +37,15 @@ jobs:
           cd docs
           quarto render
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to gh-pages/production
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/_site
-          destination_dir: .
-          keep_files: true
+          destination_dir: production
+          keep_files: true  # don't wipe staging previews
+
+## Deployment with native github pages change: Settings -> Pages -> Build and Deployment: Source: Github Action
 
 # permissions:
 #   contents: read
