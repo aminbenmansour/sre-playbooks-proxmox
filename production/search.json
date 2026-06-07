@@ -1,0 +1,194 @@
+[
+  {
+    "objectID": "incident-reviews/unlock_pve_vms.html",
+    "href": "incident-reviews/unlock_pve_vms.html",
+    "title": "Incident Review: VM Locked After Backup Failure",
+    "section": "",
+    "text": "This document tracks real incidents where VMs were left in a locked: backup state after a failed PBS backup. Each entry links back to the runbook explanation and the remediation runbook.",
+    "crumbs": [
+      "Incident Reviews",
+      "Incident Review: VM Locked After Backup Failure"
+    ]
+  },
+  {
+    "objectID": "incident-reviews/unlock_pve_vms.html#purpose",
+    "href": "incident-reviews/unlock_pve_vms.html#purpose",
+    "title": "Incident Review: VM Locked After Backup Failure",
+    "section": "",
+    "text": "This document tracks real incidents where VMs were left in a locked: backup state after a failed PBS backup. Each entry links back to the runbook explanation and the remediation runbook.",
+    "crumbs": [
+      "Incident Reviews",
+      "Incident Review: VM Locked After Backup Failure"
+    ]
+  },
+  {
+    "objectID": "incident-reviews/unlock_pve_vms.html#incident-log",
+    "href": "incident-reviews/unlock_pve_vms.html#incident-log",
+    "title": "Incident Review: VM Locked After Backup Failure",
+    "section": "2 Incident Log",
+    "text": "2 Incident Log\n\n2.1 INC-001 — 2025-03-14\n\n\n\n\n\n\n\nField\nDetail\n\n\n\n\nVM ID\n112\n\n\nNode\npve-node-02\n\n\nLock detected\nlocked: backup\n\n\nRoot cause\nPBS network timeout during incremental backup at 02:17 UTC\n\n\nImpact\nVM online but unmigrateable for ~40 min\n\n\nResolved by\nManual lock clear via runbook after confirming no active vzdump task\n\n\nResolution time\n40 minutes\n\n\nRunbook followed\nYes — unlock_pve_vms.py\n\n\nSafety check passed\nYes — no active vzdump task found\n\n\n\nTimeline:\n\n02:17 — PBS reports connection lost mid-backup\n02:19 — Alert triggered: VM 112 migration fails on pve-node-02\n02:31 — On-call SRE identifies lock: backup in VM config\n02:45 — Runbook executed, safety check passed, lock cleared\n02:57 — VM successfully migrated, incident closed\n\nNotes: &gt; Backup network path between PBS and pve-node-02 flapped due to a switch &gt; port reset. No data corruption observed. Dirty bitmap was invalidated and &gt; next backup ran as a full backup automatically.",
+    "crumbs": [
+      "Incident Reviews",
+      "Incident Review: VM Locked After Backup Failure"
+    ]
+  },
+  {
+    "objectID": "incident-reviews/unlock_pve_vms.html#recurring-patterns",
+    "href": "incident-reviews/unlock_pve_vms.html#recurring-patterns",
+    "title": "Incident Review: VM Locked After Backup Failure",
+    "section": "3 Recurring Patterns",
+    "text": "3 Recurring Patterns\n\nMost incidents occur during the 02:00–04:00 UTC backup window\npve-node-02 has had the most occurrences — network path investigation pending\nAll incidents resolved without VM downtime",
+    "crumbs": [
+      "Incident Reviews",
+      "Incident Review: VM Locked After Backup Failure"
+    ]
+  },
+  {
+    "objectID": "incident-reviews/unlock_pve_vms.html#preventive-measures-tracked",
+    "href": "incident-reviews/unlock_pve_vms.html#preventive-measures-tracked",
+    "title": "Incident Review: VM Locked After Backup Failure",
+    "section": "4 Preventive Measures Tracked",
+    "text": "4 Preventive Measures Tracked\n\n\n\nMeasure\nStatus\n\n\n\n\nIncrease PBS backup timeout threshold\n✅ Done — set to 3600s\n\n\nAdd lock-detection alert in monitoring\n🔄 In progress\n\n\nRedundant network path for PBS traffic\n❌ Pending",
+    "crumbs": [
+      "Incident Reviews",
+      "Incident Review: VM Locked After Backup Failure"
+    ]
+  },
+  {
+    "objectID": "incident-reviews/unlock_pve_vms.html#references",
+    "href": "incident-reviews/unlock_pve_vms.html#references",
+    "title": "Incident Review: VM Locked After Backup Failure",
+    "section": "5 References",
+    "text": "5 References\n\nRunbook Explanation — Understanding the Lock\nRemediation Runbook — unlock_pve_vms.py\nProxmox Backup Locking Docs",
+    "crumbs": [
+      "Incident Reviews",
+      "Incident Review: VM Locked After Backup Failure"
+    ]
+  },
+  {
+    "objectID": "runbook-explanation/unlock_pve_vms.html",
+    "href": "runbook-explanation/unlock_pve_vms.html",
+    "title": "Proxmox Knowledge Base: Understanding & Fixing locked: backup",
+    "section": "",
+    "text": "When a Proxmox Backup Server (PBS) backup is interrupted (usually via network timeout), the Proxmox hypervisor may fail to drop the backup lock on the VM configuration file (/etc/pve/qemu-server/&lt;vmid&gt;.conf).\nThe VM will remain running, but SREs cannot migrate, resize, or reboot the VM until the lock is cleared. That behavior protects against the corruption of the QEMU dirty-bitmap tracking used for incremental backups.",
+    "crumbs": [
+      "Runbook Explanations",
+      "Proxmox Knowledge Base: Understanding & Fixing `locked: backup`"
+    ]
+  },
+  {
+    "objectID": "runbook-explanation/unlock_pve_vms.html#incident-overview",
+    "href": "runbook-explanation/unlock_pve_vms.html#incident-overview",
+    "title": "Proxmox Knowledge Base: Understanding & Fixing locked: backup",
+    "section": "",
+    "text": "When a Proxmox Backup Server (PBS) backup is interrupted (usually via network timeout), the Proxmox hypervisor may fail to drop the backup lock on the VM configuration file (/etc/pve/qemu-server/&lt;vmid&gt;.conf).\nThe VM will remain running, but SREs cannot migrate, resize, or reboot the VM until the lock is cleared. That behavior protects against the corruption of the QEMU dirty-bitmap tracking used for incremental backups.",
+    "crumbs": [
+      "Runbook Explanations",
+      "Proxmox Knowledge Base: Understanding & Fixing `locked: backup`"
+    ]
+  },
+  {
+    "objectID": "runbook-explanation/unlock_pve_vms.html#the-architecture-of-a-lock",
+    "href": "runbook-explanation/unlock_pve_vms.html#the-architecture-of-a-lock",
+    "title": "Proxmox Knowledge Base: Understanding & Fixing locked: backup",
+    "section": "2 The Architecture of a Lock",
+    "text": "2 The Architecture of a Lock\nWhen vzdump runs, it manipulates the QEMU process to track “dirty” blocks.\n\n\nCode\nsequenceDiagram\n    participant PBS as Proxmox Backup Server\n    participant PVE as PVE Node\n    participant QEMU as VM Process\n\n    PBS-&gt;&gt;PVE: Request Backup (API)\n    PVE-&gt;&gt;PVE: Write `lock: backup` to config\n    PVE-&gt;&gt;QEMU: Initiate Snapshot / Dirty Bitmap\n    QEMU--&gt;&gt;PVE: Stream data\n    PVE--&gt;&gt;PBS: Send Chunks\n    Note over PBS,PVE: If network drops here, lock remains!\n\n\n\n\n\nsequenceDiagram\n    participant PBS as Proxmox Backup Server\n    participant PVE as PVE Node\n    participant QEMU as VM Process\n\n    PBS-&gt;&gt;PVE: Request Backup (API)\n    PVE-&gt;&gt;PVE: Write `lock: backup` to config\n    PVE-&gt;&gt;QEMU: Initiate Snapshot / Dirty Bitmap\n    QEMU--&gt;&gt;PVE: Stream data\n    PVE--&gt;&gt;PBS: Send Chunks\n    Note over PBS,PVE: If network drops here, lock remains!",
+    "crumbs": [
+      "Runbook Explanations",
+      "Proxmox Knowledge Base: Understanding & Fixing `locked: backup`"
+    ]
+  },
+  {
+    "objectID": "runbook-explanation/unlock_pve_vms.html#remediation-protocol",
+    "href": "runbook-explanation/unlock_pve_vms.html#remediation-protocol",
+    "title": "Proxmox Knowledge Base: Understanding & Fixing locked: backup",
+    "section": "3 Remediation Protocol",
+    "text": "3 Remediation Protocol\nDo not use the GUI to blindly unlock the VM. Follow the interactive runbook below.",
+    "crumbs": [
+      "Runbook Explanations",
+      "Proxmox Knowledge Base: Understanding & Fixing `locked: backup`"
+    ]
+  },
+  {
+    "objectID": "runbook-explanation/unlock_pve_vms.html#under-the-hood-the-safety-guardrail",
+    "href": "runbook-explanation/unlock_pve_vms.html#under-the-hood-the-safety-guardrail",
+    "title": "Proxmox Knowledge Base: Understanding & Fixing locked: backup",
+    "section": "4 Under the Hood: The Safety Guardrail",
+    "text": "4 Under the Hood: The Safety Guardrail\nOur library/pve_safety.py module queries the /api2/json/nodes/{node}/tasks endpoint. If any task matches type: vzdump and the vmid, we block the unlock command to prevent corrupting the QCOW2/RBD image.\n\n\nCode\n# Core safety logic abstraction\ntasks = proxmox.nodes(node).tasks.get()\nfor task in tasks:\n    if task['status'] == 'running' and task['type'] == 'vzdump':\n        raise Exception(\"Unsafe to unlock!\")",
+    "crumbs": [
+      "Runbook Explanations",
+      "Proxmox Knowledge Base: Understanding & Fixing `locked: backup`"
+    ]
+  },
+  {
+    "objectID": "runbook-explanation/unlock_pve_vms.html#interactive-runbook",
+    "href": "runbook-explanation/unlock_pve_vms.html#interactive-runbook",
+    "title": "Proxmox Knowledge Base: Understanding & Fixing locked: backup",
+    "section": "5 Interactive Runbook",
+    "text": "5 Interactive Runbook\nThe runbook runs as a local Marimo app that calls your real Proxmox API directly. No credentials ever leave your machine.\n\n  \n    ⚡ Interactive runbook — requires marimo run runbooks/compute/unlock_pve_vms.py running locally\n  \n  \n  \n  \n\n    \n      ⚙️\n      \n        Runbook server not running\n      \n      \n        Export your credentials and start Marimo, then click Retry below.\n      \n\n      \n        terminal\n        export PVE_CLUSTER_ENDPOINT=\"https://pve-cluster.example.com\"\nexport PVE_USER=\"sre-api@pam\"\nexport PVE_TOKEN_NAME=\"runbook-token\"\nexport PVE_TOKEN=\"your-token-here\"\n\nmarimo run runbooks/compute/unlock_pve_vms.py\n      \n\n      \n        ↻  Retry connection\n      \n      \n        Marimo starts on http://localhost:2718 by default.",
+    "crumbs": [
+      "Runbook Explanations",
+      "Proxmox Knowledge Base: Understanding & Fixing `locked: backup`"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "SRE Playbooks – Proxmox",
+    "section": "",
+    "text": "This site contains the SRE runbooks and incident review documentation for managing our Proxmox Virtual Environment (PVE) infrastructure.",
+    "crumbs": [
+      "SRE Playbooks – Proxmox"
+    ]
+  },
+  {
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
+    "title": "SRE Playbooks – Proxmox",
+    "section": "",
+    "text": "This site contains the SRE runbooks and incident review documentation for managing our Proxmox Virtual Environment (PVE) infrastructure.",
+    "crumbs": [
+      "SRE Playbooks – Proxmox"
+    ]
+  },
+  {
+    "objectID": "index.html#structure",
+    "href": "index.html#structure",
+    "title": "SRE Playbooks – Proxmox",
+    "section": "2 Structure",
+    "text": "2 Structure\n\nRunbooks — Step-by-step operational procedures (e.g., unlocking VMs)\nIncident Reviews — Post-mortems and explanations tied to specific runbooks",
+    "crumbs": [
+      "SRE Playbooks – Proxmox"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "SRE Playbooks – Proxmox",
+    "section": "3 How to Use",
+    "text": "3 How to Use\nNavigate using the sidebar. Each runbook is self-contained and includes:\n\nPrerequisites\nStep-by-step instructions\nRollback / recovery steps\nRelated incidents\n\n\nOn-call: Before opening any runbook page, start the local runbook server:\nmarimo run runbooks/compute/unlock_pve_vms.py\nKeep that terminal open so the embedded interactive runbook loads inside the docs.",
+    "crumbs": [
+      "SRE Playbooks – Proxmox"
+    ]
+  },
+  {
+    "objectID": "index.html#runbooks",
+    "href": "index.html#runbooks",
+    "title": "SRE Playbooks – Proxmox",
+    "section": "4 Runbooks",
+    "text": "4 Runbooks\n\n\n\nRunbook\nDescription\n\n\n\n\nUnlock PVE VMs\nHow to unlock stuck or locked VMs in Proxmox",
+    "crumbs": [
+      "SRE Playbooks – Proxmox"
+    ]
+  },
+  {
+    "objectID": "index.html#incident-reviews",
+    "href": "index.html#incident-reviews",
+    "title": "SRE Playbooks – Proxmox",
+    "section": "5 Incident Reviews",
+    "text": "5 Incident Reviews\n\n\n\nReview\nDescription\n\n\n\n\nVM Locked After Backup Failure\nPost-mortem log for locked: backup incidents",
+    "crumbs": [
+      "SRE Playbooks – Proxmox"
+    ]
+  }
+]
