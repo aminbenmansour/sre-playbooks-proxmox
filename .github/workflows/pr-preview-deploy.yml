@@ -29,7 +29,7 @@ jobs:
           stable_branch: "main"
           skip_ci: "Staging"
           skip_reviews: "Staging"
-          environment_urls: "Staging|https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/previews/pr-${{ github.event.issue.number }}/"
+          environment_urls: "Staging|https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/previews/pr-${{ github.event.number }}/"
 
       - uses: actions/checkout@v6
         if: ${{ steps.branch-deploy.outputs.continue == 'true' }}
@@ -56,13 +56,13 @@ jobs:
           cd docs
           quarto render
 
-      - name: Deploy preview to gh-pages/staging/pr-<number>
+      - name: Deploy preview to gh-pages/previews/pr-${{ github.event.number }}
         if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop != 'true' }}
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/_site
-          destination_dir: staging/pr-${{ github.event.number }}
+          destination_dir: previews/pr-${{ github.event.number }}
           keep_files: true   # don't wipe other previews
 
       - name: Post preview URL as PR comment
