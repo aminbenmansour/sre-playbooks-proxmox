@@ -1,0 +1,74 @@
+---
+title: "Incident Review: HA Fencing Loop"
+subtitle: "Post-mortem log for repeated node fencing events on Proxmox"
+author: "SRE Infrastructure Team"
+date: today
+format:
+  html:
+    toc: true
+    theme: cosmo
+---
+
+## Purpose
+
+This document tracks incidents where a Proxmox cluster node entered a fencing loop — being repeatedly fenced by the HA Manager within a short window. Each entry links back to the [runbook explanation](../runbook-explanation/ha_fencing_loop.qmd) and the [remediation runbook](../../runbooks/compute/ha_fencing_loop.md).
+
+---
+
+## Incident Log
+
+### INC-002 — 2025-05-20
+
+| Field | Detail |
+|---|---|
+| **Node** | pve-node-03 |
+| **Fence events in window** | 5 (detected within 47 minutes) |
+| **Root cause** | IPMI BMC unreachable from fence agent due to management VLAN misconfiguration after a switch firmware upgrade |
+| **Impact** | 8 VMs migrated repeatedly across pve-node-01 and pve-node-02; two VMs experienced application-layer errors due to rapid successive restarts |
+| **Resolved by** | Node isolated via maintenance mode; VLAN ACL corrected; node re-added after BMC reachability confirmed |
+| **Resolution time** | 1 hour 12 minutes |
+| **Runbook followed** | Yes — `ha_fencing_loop.md` |
+| **Safety check passed** | Yes — `detect_ha_fencing_loop` confirmed loop before intervention; quorum verified intact (2 of 3 nodes) |
+
+**Timeline:**
+
+- `03:41` — Switch firmware upgrade completes on mgmt switch; management VLAN ACL silently drops IPMI traffic
+- `03:44` — HA Manager loses heartbeat on pve-node-03; issues first fence via IPMI
+- `03:44` — Fence "succeeds" (IPMI unreachable → agent times out with success assumption); node reboots unassisted
+- `03:49` — pve-node-03 rejoins cluster; heartbeat re-established briefly
+- `03:51` — Heartbeat lost again (node NIC negotiation delay post-boot); second fence issued
+- `04:11` — On-call SRE paged: 4 fence events in 30 minutes
+- `04:18` — `detect_ha_fencing_loop` confirms loop; quorum verified at 2/3
+- `04:22` — pve-node-03 placed in maintenance mode; fencing stops
+- `04:38` — Management VLAN ACL corrected; IPMI reachability verified from fence agent
+- `04:53` — pve-node-03 removed from maintenance; HA resources re-enabled; cluster stable
+
+**Notes:**
+> The fence agent was configured to treat IPMI timeout as a successful fence (default Proxmox behaviour). This is intentional — an unreachable BMC is assumed to mean the node is powered off. The real fix is ensuring BMC reachability before production changes to the management network. A pre-change checklist item has been added.
+
+---
+
+<!-- Copy the block above for each new incident -->
+
+## Recurring Patterns
+
+- All recorded loop events have involved `pve-node-03` — its BMC is on a separate management VLAN that has been involved in two separate network changes
+- Loop duration before detection: average 27 minutes — detection alerting threshold to be reduced to 10 minutes (2 fence events)
+- No data corruption observed in any incident; RBD journals recovered cleanly in all cases
+
+## Preventive Measures Tracked
+
+| Measure | Status |
+|---|---|
+| Alert on ≥ 2 fence events within 15 minutes | 🔄 In progress — monitoring team |
+| Add IPMI reachability to pre-change checklist for mgmt network | ✅ Done |
+| Increase fence agent timeout to outlast node POST time | ✅ Done — set to 120 s |
+| Redundant BMC network path (dedicated OOB switch) | ❌ Pending — hardware procurement |
+| Automated `detect_ha_fencing_loop` check in CI chaos suite | 🔄 In progress |
+
+## References
+
+- [Runbook Explanation — Understanding HA Fencing Loops](../runbook-explanation/ha_fencing_loop.qmd)
+- [Remediation Runbook — ha_fencing_loop.md](https://github.com/aminbenmansour/sre-playbooks-proxmox/blob/main/runbooks/compute/ha_fencing_loop.md)
+- [Proxmox HA Manager Documentation](https://pve.proxmox.com/wiki/High_Availability)
+- [Proxmox Fencing / Watchdog](https://pve.proxmox.com/wiki/Watchdog)

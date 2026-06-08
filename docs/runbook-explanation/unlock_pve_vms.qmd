@@ -1,5 +1,5 @@
 ---
-title: "Proxmox Knowledge Base: Understanding & Fixing `locked: backup`"
+title: "Understanding & Fixing `locked: backup`"
 author: "SRE Infrastructure Team"
 date: today
 format:

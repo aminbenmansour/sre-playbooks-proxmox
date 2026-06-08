@@ -30,14 +30,16 @@ Navigate using the sidebar. Each runbook is self-contained and includes:
 > ```
 > Keep that terminal open so the embedded interactive runbook loads inside the docs.
 
-## Runbooks
-
-| Runbook | Description |
-|---|---|
-| [Unlock PVE VMs](runbook-explanation/unlock_pve_vms.qmd) | How to unlock stuck or locked VMs in Proxmox |
-
-## Incident Reviews
-
+## 🔥 Incident Reviews
 | Review | Description |
 |---|---|
-| [VM Locked After Backup Failure](incident-reviews/unlock_pve_vms.qmd) | Post-mortem log for `locked: backup` incidents |
+| [🔒 VM Locked After Backup Failure](incident-reviews/unlock_pve_vms.qmd) | Post-mortem log for `locked: backup` incidents |
+|---|---|
+| [🤺 HA Fencing Loop](incident-reviews/ha_fencing_loop.qmd) | Post-mortem log for repeated node fencing events|
+
+## 📖 Proxmox Knowledge Base: Runbook Explanations
+| Runbook | Description |
+|---|---|
+| [🔒 Unlock PVE VMs](runbook-explanation/unlock_pve_vms.qmd) | How to unlock stuck or locked VMs in Proxmox |
+|---|---|
+| [🤺 Remediate HA Fencing Loop](runbook-explanation/ha_fencing_loop.qmd) | How to remediate fencing loop events in Proxmox |

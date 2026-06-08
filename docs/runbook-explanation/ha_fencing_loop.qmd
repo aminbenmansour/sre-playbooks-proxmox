@@ -1,0 +1,104 @@
+---
+title: "Understanding HA Fencing Loops"
+author: "SRE Infrastructure Team"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+---
+
+## Incident Overview
+
+A **fencing loop** occurs when the Proxmox HA Manager repeatedly fences (forcibly powers off) the same node within a short window — typically because the node is rebooting faster than the fence timeout, or because the root cause (IPMI unreachability, storage I/O hang, NIC flap) is never cleared between fence attempts.
+
+The VM workload migrates to surviving nodes, runs briefly, then gets fenced again when the problem node rejoins and the same condition recurs. This produces continuous failover churn and can saturate surviving nodes.
+
+## The Architecture of HA Fencing
+
+Proxmox HA uses a watchdog/fencing mechanism to enforce node isolation before recovering VMs. The sequence below shows the normal flow and where a loop forms.
+
+```{mermaid}
+sequenceDiagram
+    participant HA as HA Manager
+    participant Node as Faulted Node
+    participant IPMI as IPMI / Fence Agent
+    participant Cluster as Surviving Nodes
+
+    HA->>Node: Heartbeat lost
+    HA->>IPMI: Fence node (power off)
+    IPMI-->>HA: Fenced OK
+    HA->>Cluster: Recover VMs from fenced node
+    Note over Node,HA: Node reboots and rejoins...
+    Node-->>HA: Heartbeat restored
+    HA->>Node: Heartbeat lost (condition recurs!)
+    HA->>IPMI: Fence node AGAIN ← loop begins
+```
+
+## Why Loops Are Dangerous
+
+| Risk | Explanation |
+|---|---|
+| VM churn | VMs are migrated and killed in rapid succession, causing application-layer disruption |
+| Surviving node overload | Each failover wave lands workload on remaining nodes; repeated waves compound load |
+| Storage state corruption | Repeated unclean shutdowns can invalidate QCOW2 dirty bitmaps or RBD journal entries |
+| Quorum degradation | If two nodes loop-fence simultaneously, the cluster may lose quorum entirely |
+
+## The Safety Guardrail
+
+`library/pve_ha.py` introduces `detect_ha_fencing_loop`, which scans the Proxmox task history for completed `hamanager` fence events within a configurable observation window.
+
+```{python}
+#| eval: false
+# Core detection logic
+tasks = proxmox.nodes(node).tasks.get()
+fence_events = [
+    t for t in tasks
+    if t["type"] == "hamanager" and "fence" in t["id"] and t["status"] != "running"
+]
+
+# Group by fenced node and count within the window
+for node, events in events_by_node.items():
+    if len(events) >= threshold:
+        report.looping_nodes.append(node)
+```
+
+The function returns a `FencingLoopReport` with an `is_safe` boolean. Runbook steps and any automation that modifies HA state must gate on `report.is_safe`.
+
+## Remediation Decision Tree
+
+```{mermaid}
+flowchart TD
+    A[Alert: repeated fence events] --> B{Quorum intact?}
+    B -- No --> C[🚨 Escalate — split-brain protocol]
+    B -- Yes --> D{Loop confirmed by detect_ha_fencing_loop?}
+    D -- No --> E[Monitor — may be transient]
+    D -- Yes --> F[Inspect fenced node: IPMI, NIC, storage]
+    F --> G{Hardware reachable?}
+    G -- No --> H[Freeze HA resources + isolate node]
+    G -- Yes --> I[Check storage I/O hang / watchdog timer]
+    I --> H
+    H --> J[Resolve hardware root cause]
+    J --> K[Remove node from maintenance, re-enable HA]
+```
+
+## Common Root Causes
+
+**IPMI / BMC unreachability** — The fence agent confirms the fence but the node boots again before the issue is resolved. Check BMC firmware and network path to the management VLAN.
+
+**Storage I/O hang** — A Ceph or NFS I/O stall causes the node's watchdog to expire repeatedly. Look for `hung_task` kernel messages in `journalctl` on the affected node.
+
+**NIC / bond flap** — Loss of the cluster network causes heartbeat failure. The node fences, reboots, rejoins, and loses the cluster network again. Check `dmesg` for link-down events and inspect switch port counters.
+
+**Misconfigured fence timeout** — A fence timeout shorter than the node's POST/boot time means the node is guaranteed to rejoin before it is considered truly isolated.
+
+## References
+
+- [Remediation Runbook — ha_fencing_loop.md](../../runbooks/compute/ha_fencing_loop.md)
+- [Incident Reviews — HA Fencing Loop](../incident-reviews/ha_fencing_loop.qmd)
+- [Proxmox HA Manager Documentation](https://pve.proxmox.com/wiki/High_Availability)
+- [Proxmox Fencing / Watchdog](https://pve.proxmox.com/wiki/Watchdog)
