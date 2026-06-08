@@ -292,7 +292,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="under-the-hood-the-safety-guardrail" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="under-the-hood-the-safety-guardrail"><span class="header-section-number">4</span> Under the Hood: The Safety Guardrail</h2>
 <p>Our <code>library/pve_safety.py</code> module queries the <code>/api2/json/nodes/{node}/tasks</code> endpoint. If any task matches <code>type: vzdump</code> and the <code>vmid</code>, we block the unlock command to prevent corrupting the <code>QCOW2/RBD</code> image.</p>
-<div id="87ed076f" class="cell" data-execution_count="1">
+<div id="ba158dfc" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Core safety logic abstraction</span></span>
