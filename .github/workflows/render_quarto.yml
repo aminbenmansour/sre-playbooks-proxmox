@@ -45,6 +45,32 @@ jobs:
           destination_dir: production
           keep_files: true  # don't wipe staging previews
 
+      - name: Create root redirect to production
+        run: |
+          mkdir -p /tmp/redirect
+          cat > /tmp/redirect/index.html << 'HTML'
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta http-equiv="refresh" content="0; url=./production/">
+              <link rel="canonical" href="./production/">
+              <title>Redirecting…</title>
+            </head>
+            <body>
+              <p>Redirecting to <a href="./production/">documentation</a>…</p>
+            </body>
+          </html>
+          HTML
+
+      - name: Deploy root redirect to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: /tmp/redirect
+          destination_dir: .
+          keep_files: true
+
 ## Deployment with native github pages change: Settings -> Pages -> Build and Deployment: Source: Github Action
 
 # permissions:
